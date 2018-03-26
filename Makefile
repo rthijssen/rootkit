@@ -1,5 +1,5 @@
 .PHONY: all
-obj-m := rootkit.o
+obj-m := modef.o
 KERNEL_DIR = /lib/modules/$(shell uname -r)/build
 PWD = $(shell pwd)
 all: rootkit client
